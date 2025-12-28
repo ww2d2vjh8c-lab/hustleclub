@@ -1,5 +1,5 @@
 import { applyForClippingJob } from "@/app/actions/clipping/applyForClippingJob";
-import { SubmitButton } from "@/components/SubmitButton";
+import SubmitButton from "@/components/SubmitButton";
 
 export default function Page({
   params,

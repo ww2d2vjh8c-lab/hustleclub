@@ -1,7 +1,7 @@
 "use client"
 
 import { deleteItem } from "@/app/actions/thrifting/deleteItem"
-import { SubmitButton } from "@/components/SubmitButton"
+import SubmitButton from "@/components/SubmitButton";
 
 interface DeleteThriftItemButtonProps {
   itemId: string

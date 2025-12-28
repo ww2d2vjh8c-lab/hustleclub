@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClippingJob } from "@/app/actions/clipping/createClippingJob";
-import { SubmitButton } from "@/components/SubmitButton";
+import SubmitButton from "@/components/SubmitButton";;
 
 export default function CreateClippingJob() {
   const [error, setError] = useState("");
