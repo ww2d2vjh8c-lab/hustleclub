@@ -1,14 +1,22 @@
-import { redirect } from "next/navigation";
-import { getUserWithRole } from "@/lib/getUserWithRole";
-import CreateClippingJob from "./CreateClippingJob";
+import SubmitButton from "../../../../components/SubmitButton";
+import { createClippingJob } from "../../../actions/clipping/createClippingJob";
 
-export default async function CreateJobPage() {
-  const userData = await getUserWithRole();
+export default function CreateClippingJobPage() {
+  return (
+    <form action={createClippingJob} className="space-y-4">
+      <input name="title" placeholder="Title" required />
+      <textarea name="description" placeholder="Description" required />
 
-  const isCreator =
-    userData?.role === "creator" || userData?.role === "admin";
+      <input name="platform" placeholder="Platform" required />
 
-  if (!isCreator) redirect("/dashboard/clipping");
+      <input
+        name="reward"
+        type="number"
+        placeholder="Reward"
+        required
+      />
 
-  return <CreateClippingJob />;
+      <SubmitButton>Create Clipping Job</SubmitButton>
+    </form>
+  );
 }

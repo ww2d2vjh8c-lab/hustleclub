@@ -1,32 +1,21 @@
-"use client"
+"use client";
 
-import { useFormStatus } from "react-dom"
+import { useFormStatus } from "react-dom";
 
-interface SubmitButtonProps {
-  children: React.ReactNode
-  className?: string
-  confirm?: string
-}
-
-export function SubmitButton({
+export default function SubmitButton({
   children,
-  className = "",
-  confirm,
-}: SubmitButtonProps) {
-  const { pending } = useFormStatus()
+}: {
+  children: React.ReactNode;
+}) {
+  const { pending } = useFormStatus();
 
   return (
     <button
       type="submit"
       disabled={pending}
-      onClick={(e) => {
-        if (confirm && !window.confirm(confirm)) {
-          e.preventDefault()
-        }
-      }}
-      className={`px-3 py-1 rounded disabled:opacity-50 ${className}`}
+      className="bg-blue-600 text-white px-4 py-2 rounded"
     >
       {pending ? "Processing..." : children}
     </button>
-  )
+  );
 }

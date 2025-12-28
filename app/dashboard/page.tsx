@@ -1,156 +1,137 @@
-import Link from "next/link"
+// app/dashboard/page.tsx
+import Link from "next/link";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { getUserWithRole } from "@/lib/getUserWithRole";
+
 import {
   BookOpen,
-  ShoppingBag,
   Scissors,
-  Globe,
-  ArrowRight,
-} from "lucide-react"
-import { createSupabaseServerClient } from "@/lib/supabase-server"
+  Store,
+  LayoutDashboard,
+  PlusCircle,
+  Settings,
+} from "lucide-react";
+
+// Re-usable card
+function FeatureCard({
+  title,
+  description,
+  href,
+  icon,
+}: {
+  title: string;
+  description: string;
+  href: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="border rounded-xl p-5 hover:shadow-md transition bg-white space-y-2"
+    >
+      <div className="text-2xl">{icon}</div>
+      <h3 className="font-semibold text-lg">{title}</h3>
+      <p className="text-gray-600 text-sm">{description}</p>
+    </Link>
+  );
+}
 
 export default async function DashboardPage() {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient();
+  const userData = await getUserWithRole();
 
-  const [{ count: courses }, { count: thrifts }, { count: jobs }] =
+  const role = userData?.role || "user";
+  const isCreator = role === "creator" || role === "admin";
+
+  // Stats
+  const [{ count: courseCount }, { count: thriftCount }, { count: jobCount }] =
     await Promise.all([
       supabase.from("courses").select("*", { count: "exact", head: true }),
       supabase.from("thrift_items").select("*", { count: "exact", head: true }),
       supabase.from("clipping_jobs").select("*", { count: "exact", head: true }),
-    ])
+    ]);
 
   return (
-    <div className="p-6 space-y-10 max-w-6xl mx-auto">
-      {/* HEADER */}
+    <div className="p-6 space-y-8">
       <div>
         <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-gray-600 mt-1">
-          Everything you create, sell, and manage — in one place
+        <p className="text-gray-600">
+          Manage learning, earning, and opportunities — all in one place.
         </p>
       </div>
 
-      {/* STATS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Stat title="Courses" value={courses ?? 0} />
-        <Stat title="Thrift Listings" value={thrifts ?? 0} />
-        <Stat title="Clipping Jobs" value={jobs ?? 0} />
+      {/* QUICK STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-4 border rounded-xl bg-white">
+          <p className="text-gray-500 text-sm">Courses</p>
+          <p className="text-2xl font-bold">{courseCount || 0}</p>
+        </div>
+
+        <div className="p-4 border rounded-xl bg-white">
+          <p className="text-gray-500 text-sm">Thrift Listings</p>
+          <p className="text-2xl font-bold">{thriftCount || 0}</p>
+        </div>
+
+        <div className="p-4 border rounded-xl bg-white">
+          <p className="text-gray-500 text-sm">Clipping Jobs</p>
+          <p className="text-2xl font-bold">{jobCount || 0}</p>
+        </div>
       </div>
 
       {/* FEATURES */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Feature
-          icon={<BookOpen size={26} />}
-          title="My Courses"
-          description="Create structured learning content, publish courses, and earn from your knowledge."
-          bullets={[
-            "Create & edit courses",
-            "Publish lessons",
-            "Track enrollments",
-          ]}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <FeatureCard
+          title="Courses"
+          description="Learn and manage your enrolled courses."
           href="/dashboard/courses"
+          icon={<BookOpen />}
         />
 
-        <Feature
-          icon={<ShoppingBag size={26} />}
+        <FeatureCard
           title="Thrifting"
-          description="Buy and sell thrifted products directly on the platform."
-          bullets={[
-            "List thrift items",
-            "Manage inventory",
-            "Connect with buyers",
-          ]}
+          description="Buy and sell quality thrifted items."
           href="/dashboard/thrifting"
+          icon={<Store />}
         />
 
-        <Feature
-          icon={<Scissors size={26} />}
+        <FeatureCard
           title="UGC / Clipping Jobs"
-          description="Post paid UGC clipping jobs and manage creator applications."
-          bullets={[
-            "Create clipping jobs",
-            "Review applications",
-            "Pay per views or tasks",
-          ]}
+          description="Apply to paid UGC clipping jobs and start earning."
           href="/dashboard/clipping"
+          icon={<Scissors />}
         />
 
-        <Feature
-          icon={<Globe size={26} />}
-          title="Global News"
-          description="Curated global opportunities, trends, and creator economy updates."
-          bullets={[
-            "Creator opportunities",
-            "Platform updates",
-            "Industry news",
-          ]}
-          disabled
+        <FeatureCard
+          title="Settings"
+          description="Manage your profile, email, and preferences."
+          href="/dashboard/profile"
+          icon={<Settings />}
         />
       </div>
-    </div>
-  )
-}
 
-/* ---------------- COMPONENTS ---------------- */
+      {/* CREATOR TOOLS */}
+      {isCreator && (
+        <div className="space-y-3">
+          <h2 className="font-semibold text-lg flex items-center gap-2">
+            <LayoutDashboard size={18} /> Creator Tools
+          </h2>
 
-function Stat({ title, value }: { title: string; value: number }) {
-  return (
-    <div className="rounded-xl border p-4 bg-white">
-      <p className="text-sm text-gray-500">{title}</p>
-      <p className="text-2xl font-bold mt-1">{value}</p>
-    </div>
-  )
-}
-
-function Feature({
-  icon,
-  title,
-  description,
-  bullets,
-  href,
-  disabled,
-}: {
-  icon: React.ReactNode
-  title: string
-  description: string
-  bullets: string[]
-  href?: string
-  disabled?: boolean
-}) {
-  const Card = (
-    <div
-      className={`rounded-xl border p-6 h-full ${
-        disabled ? "opacity-60" : "hover:shadow-md transition"
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-gray-100">{icon}</div>
-        <h3 className="text-lg font-semibold">{title}</h3>
-      </div>
-
-      <p className="text-sm text-gray-600 mt-3">{description}</p>
-
-      <ul className="mt-4 space-y-1 text-sm text-gray-700 list-disc list-inside">
-        {bullets.map((b) => (
-          <li key={b}>{b}</li>
-        ))}
-      </ul>
-
-      {!disabled && (
-        <div className="mt-5 inline-flex items-center text-sm font-medium">
-          Open <ArrowRight size={16} className="ml-1" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link
+              href="/dashboard/clipping/create"
+              className="border rounded-xl p-5 hover:shadow-md transition bg-indigo-50"
+            >
+              <div className="flex items-center gap-2 text-indigo-700 font-semibold">
+                <PlusCircle size={18} />
+                Post a Clipping Job
+              </div>
+              <p className="text-gray-600 text-sm mt-1">
+                Create paid editing jobs for creators.
+              </p>
+            </Link>
+          </div>
         </div>
       )}
-
-      {disabled && (
-        <p className="mt-5 text-sm text-gray-400">Coming soon</p>
-      )}
     </div>
-  )
-
-  if (disabled) return Card
-
-  return (
-    <Link href={href!} className="block">
-      {Card}
-    </Link>
-  )
+  );
 }

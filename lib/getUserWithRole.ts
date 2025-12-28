@@ -1,9 +1,12 @@
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { createSupabaseServerClient } from "./supabase-server";
 
 export async function getUserWithRole() {
   const supabase = await createSupabaseServerClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) return null;
 
   const { data: profile } = await supabase
@@ -12,5 +15,5 @@ export async function getUserWithRole() {
     .eq("id", user.id)
     .single();
 
-  return { user, role: profile?.role ?? "user" };
+  return { id: user.id, email: user.email, role: profile?.role ?? "user" };
 }

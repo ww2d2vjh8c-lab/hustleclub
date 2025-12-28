@@ -1,16 +1,16 @@
-"use server"
+"use server";
 
-import { createSupabaseServerClient } from "@/lib/supabase-server"
-import { revalidatePath } from "next/cache"
+import { createSupabaseServerClient } from "../../../lib/supabase-server";
+import { requireRole } from "../../../lib/requireRole";
 
 export async function applyForClippingJob(formData: FormData) {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient();
+  const { id: userId } = await requireRole(["user", "creator", "admin"]);
 
-  const jobId = formData.get("jobId") as string
+  const jobId = formData.get("jobId") as string;
 
   await supabase.from("clipping_applications").insert({
     job_id: jobId,
-  })
-
-  revalidatePath("/dashboard/clipping")
+    user_id: userId,
+  });
 }

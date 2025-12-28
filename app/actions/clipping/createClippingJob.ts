@@ -1,19 +1,12 @@
 "use server";
 
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { createSupabaseServerClient } from "../../../lib/supabase-server";
+import { requireRole } from "../../../lib/requireRole";
 import { revalidatePath } from "next/cache";
-import { getUserWithRole } from "@/lib/getUserWithRole";
 
 export async function createClippingJob(formData: FormData) {
   const supabase = await createSupabaseServerClient();
-  const userData = await getUserWithRole();
-
-  const isCreator =
-    userData?.role === "creator" || userData?.role === "admin";
-
-  if (!isCreator) {
-    throw new Error("Not authorized to publish jobs");
-  }
+  const { id: userId } = await requireRole(["creator", "admin"]);
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
@@ -26,6 +19,8 @@ export async function createClippingJob(formData: FormData) {
     platform,
     reward,
     status: "open",
-    created_by: userData?.user.id,
+    created_by: userId,
   });
+
+  revalidatePath("/dashboard/clipping");
 }
